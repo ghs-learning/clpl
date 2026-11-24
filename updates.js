@@ -93,3 +93,39 @@
  const note=section.querySelector('.term-sequence');if(note)note.innerHTML='<b>Make time for a Nibble:</b> all sessions run from 12.45 to 1.00 pm. Dates and venues will be confirmed. Each 15-minute session offers a short introduction and a few practical ideas to take away.';
  const intro=section.querySelector('.term-intro > p');if(intro)intro.textContent='Career development, digital practice and practical ideas from colleagues — short sessions to spark your thinking. All sessions run from 12.45 to 1.00 pm; dates to be confirmed.';
 })();
+
+(()=>{
+ const calendar=document.getElementById('professionalCalendar');if(!calendar)return;
+ const additions=[
+  ['2026-09-07','PDT 1 • School focus','Rights Respecting School','School-focused professional development: Rights Respecting School.'],
+  ['2026-11-23','PDT 3 • School focus','School-focused PDT','Whole-school professional development.'],
+  ['2027-02-08','PDT 6 • School focus','School-focused PDT','Whole-school professional development.'],
+  ['2027-05-17','PDT 9 • School focus','School-focused PDT','Whole-school professional development.']
+ ];
+ for(const [date,tag,title,description] of additions){
+  const event=document.createElement('div');event.className='event pl-event school-pdt-event';event.dataset.date=date;
+  const time=document.createElement('time');time.dateTime=date;
+  const body=document.createElement('div');const badge=document.createElement('span');badge.className='tag';badge.textContent=tag;
+  const heading=document.createElement('h3');heading.textContent=title;const detail=document.createElement('p');detail.textContent=description;
+  body.append(badge,heading,detail);event.append(time,body);calendar.append(event);
+ }
+ const numbers={'2026-10-26':2,'2026-12-07':4,'2027-01-11':5,'2027-03-01':7,'2027-04-26':8};
+ for(const event of calendar.querySelectorAll('.pl-event')){
+  const badge=event.querySelector('.tag');const n=numbers[event.dataset.date];
+  if(n&&badge&&!event.classList.contains('inset-event'))badge.textContent='PDT '+n+' • OLJ focus';
+  const time=event.querySelector('time');if(time){const date=new Date(event.dataset.date+'T00:00:00');time.textContent=date.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});time.style.minWidth='120px';}
+ }
+ const events=[...calendar.querySelectorAll('.pl-event')].sort((a,b)=>a.dataset.date.localeCompare(b.dataset.date));events.forEach(event=>calendar.append(event));
+ const page=document.querySelector('[data-page="calendar"]');
+ const note=document.createElement('p');note.className='small';note.textContent='All nine PDTs and five INSET days checked against the GHS year planner for 2026–27. PDTs are labelled by school or OLJ focus. The existing OLJ celebration remains listed separately on 6 May.';
+ calendar.before(note);
+ const now=new Date();now.setHours(0,0,0,0);
+ for(const event of events){event.classList.remove('past','next-event');if(new Date(event.dataset.date+'T00:00:00')<now)event.classList.add('past');}
+ const next=events.find(event=>new Date(event.dataset.date+'T00:00:00')>=now);
+ if(next){
+  next.classList.add('next-event');const date=new Date(next.dataset.date+'T00:00:00');const days=Math.round((date-now)/86400000);
+  const title=next.querySelector('h3').textContent;const tag=next.querySelector('.tag').textContent;const human=date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const message=days===0?'Today: '+title+' • '+tag:days===1?'Tomorrow: '+title+' • '+tag:title+' is in '+days+' days • '+human;
+  for(const id of ['plAlert','homePLAlert']){const alert=document.getElementById(id);if(!alert)continue;alert.replaceChildren();const lead=document.createElement('span');lead.className='alert-title';lead.textContent=days<=7?'Professional learning reminder':'Next professional learning';alert.append(lead,document.createTextNode(message));alert.classList.remove('imminent','upcoming');alert.classList.add(days<=7?'imminent':'upcoming');}
+ }
+})();
