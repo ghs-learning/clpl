@@ -69,3 +69,26 @@
   refresh.addEventListener('click',loadDiscussions);loadDiscussions();
  }
 })();
+
+(()=>{
+ const section=document.querySelector('[data-page="nibbles"] .term-block.current');
+ if(!section)return;
+ const sessions=[
+  {match:'Probationers and NQTs only',title:'Interview Preparation for Probationers',presenter:'Gordon Reid',blurb:'Thinking about your first teaching interview? Pick up a few practical pointers on preparing examples, sharing your strengths and approaching the conversation with confidence.'},
+  {match:'Promoted Post',title:'Interview Preparation for Promoted Posts',presenter:'Scott McHendry',blurb:'Considering your next career step? Explore some useful starting points for presenting your experience, talking about your impact and preparing for a promoted-post interview.'},
+  {match:'Creating a Subject Hub for Learners',title:'Creating and Editing a Subject Hub',presenter:'Michael McCarron',blurb:'Curious about creating a hub for your subject? See how a few simple steps can bring learning resources together, and discover how easy it can be to make changes as your hub grows.'},
+  {match:'Using AI to Save Time and Improve Teaching Resources',title:'Using AI to Save Time and Improve Teaching Resources',presenter:'Andrew McCondichie',blurb:'Explore a few practical ways AI could ease everyday preparation and help develop teaching resources. Leave with ideas to try, with your professional judgement guiding the final result.'},
+  {match:'Organising an International Trip or Overnight Excursion',title:'Organising an International Trip or Overnight Excursion',presenter:'Charlotte Berry and Michael Shaw',blurb:'Thinking about taking learning beyond the classroom? Hear a few useful pointers on getting started with an international trip or overnight excursion, and the planning that helps turn an idea into a memorable experience.'}
+ ];
+ for(const card of section.querySelectorAll('.nibble-card')){
+  const session=sessions.find(item=>card.textContent.includes(item.match));
+  if(session){
+   card.querySelector('h3').textContent=session.title;
+   card.querySelector('.card-body > p:not(.presenter-line):not(.session-meta)').textContent=session.blurb;
+   card.querySelector('.presenter-line b').textContent='Delivered by: '+session.presenter;
+  }
+  const meta=card.querySelector('.session-meta');if(meta)meta.textContent='Date: TBC • 12.45–1.00 pm • 15 minutes • Venue: TBC';
+ }
+ const note=section.querySelector('.term-sequence');if(note)note.innerHTML='<b>Make time for a Nibble:</b> all sessions run from 12.45 to 1.00 pm. Dates and venues will be confirmed. Each 15-minute session offers a short introduction and a few practical ideas to take away.';
+ const intro=section.querySelector('.term-intro > p');if(intro)intro.textContent='Career development, digital practice and practical ideas from colleagues — short sessions to spark your thinking. All sessions run from 12.45 to 1.00 pm; dates to be confirmed.';
+})();
