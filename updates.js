@@ -34,15 +34,38 @@
  }
  const page=document.querySelector('[data-page="conversations"]');
  if(page){
+  const formUrl='https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=oyzTzM4Wj0KVQTctawUZKVLnjtvOIV5FoiT5ZNCp0HNURExYVDI0UEVDREhHVFAwUExENjZaSkE3Ti4u';
   const box=document.createElement('section');box.className='panel';box.id='suggest-discussion';
-  box.innerHTML='<span class="eyebrow">Choose · Question · Explore</span><h2>What should we discuss?</h2><p>Put forward a topic, ask a question or share an idea that colleagues could explore together.</p><form id="discussion-proposal"><p><label for="discussion-topic"><strong>Choose a topic</strong></label><br><select id="discussion-topic" style="max-width:100%;padding:10px">'+topics.map(t=>'<option>'+t+'</option>').join('')+'</select></p><p><label for="discussion-question"><strong>Your question or discussion idea</strong></label><br><textarea id="discussion-question" required maxlength="2500" rows="5" style="width:100%;font:inherit;padding:12px" placeholder="For example: Which questioning routines help quieter pupils share their thinking?"></textarea></p><p><label for="discussion-name">Your display name (optional)</label><br><input id="discussion-name" maxlength="80" style="max-width:100%;padding:10px"></p><p class="small">Keep contributions professional. Please do not include pupil names or confidential information. Only contributions approved by Mr McCarron should be published.</p><button type="submit" class="button">Prepare an email proposal</button><p id="proposal-status" role="status"></p></form><div class="note"><strong>Interim email route:</strong> this opens a draft in your email app addressed to Mr McCarron. You must send the email yourself. It does not post a comment or save a shared discussion. The Microsoft approval queue, automatic notification emails and public discussion feed are not connected yet.</div>';
+  box.innerHTML='<span class="eyebrow">Choose · Question · Explore</span><h2>What should we discuss?</h2><p>Choose a professional learning topic, ask a question or share an idea. Use the secure Microsoft form below; you do not need access to the school List.</p><p><a class="button" href="'+formUrl+'" target="_blank" rel="noopener noreferrer">Suggest a topic or contribute</a></p><details><summary style="cursor:pointer;font-weight:700;padding:12px 0">Open the submission form on this page</summary><iframe title="Submit a CLPL discussion topic, question or contribution" src="'+formUrl+'&amp;embed=true" loading="lazy" style="width:100%;height:980px;border:1px solid #ccc;border-radius:12px;background:white"></iframe></details><div class="note"><strong>Reviewed before publication.</strong> Your contribution goes to Mr McCarron’s moderation queue. He receives an approval request and a school email alert. Your chosen display name and text may be published after approval. Do not include pupil names or confidential information. Display names are self-selected, not verified identities.</div><p class="small">Automatic publication is being connected and tested. Until that is complete, approved contributions will not appear automatically. This form is separate from the annual CLPL survey.</p>';
   page.querySelector('h2')?.after(box);
-  document.getElementById('discussion-proposal').addEventListener('submit',e=>{
-   e.preventDefault();const topic=document.getElementById('discussion-topic').value;const question=document.getElementById('discussion-question').value.trim();if(!question)return;
-   const name=document.getElementById('discussion-name').value.trim();
-   const body='CLPL discussion proposal\n\nTopic: '+topic+'\nDisplay name: '+(name||'Not supplied')+'\n\nQuestion or idea:\n'+question+'\n\nPlease review this proposal before any public publication.';
-   location.href='mailto:mmccarron@govanhigh.glasgow.sch.uk?subject='+encodeURIComponent('CLPL discussion proposal: '+topic)+'&body='+encodeURIComponent(body);
-   document.getElementById('proposal-status').textContent='An email draft has been requested. Review it and select Send in your email app. Nothing has been posted to the website.';
-  });
+  const feed=document.createElement('section');feed.className='panel';feed.id='approved-conversations';
+  feed.innerHTML='<span class="eyebrow">Read · Reflect · Respond</span><h2>Staff discussion board</h2><p>Approved contributions will appear here for everyone to read. To respond, submit a contribution using the form above and mention the discussion number.</p><button type="button" class="button" id="refresh-discussions">Refresh discussions</button><p id="discussion-feed-status" role="status" aria-live="polite">Loading published contributions…</p><div id="discussion-feed"></div>';
+  box.after(feed);
+  const container=feed.querySelector('#discussion-feed');const status=feed.querySelector('#discussion-feed-status');const refresh=feed.querySelector('#refresh-discussions');
+  async function loadDiscussions(){
+   refresh.disabled=true;status.textContent='Loading published contributions…';
+   try{
+    const all=[];let next='https://api.github.com/repos/ghs-learning/clpl/issues?labels=clpl-approved&state=open&per_page=100&sort=created&direction=desc';
+    for(let i=0;next&&i<10;i++){
+     const response=await fetch(next,{headers:{Accept:'application/vnd.github+json'},cache:'no-store',credentials:'omit'});
+     if(!response.ok)throw Error('Feed unavailable');
+     const data=await response.json();if(!Array.isArray(data))throw Error('Invalid feed');all.push(...data);
+     const link=response.headers.get('Link')||'';const match=link.match(/<([^>]+)>; rel="next"/);next=match&&match[1].startsWith('https://api.github.com/repos/ghs-learning/clpl/issues?')?match[1]:null;
+    }
+    const approved=all.filter(item=>!item.pull_request&&item.user?.login==='michaelmcc19671888-dev'&&item.labels?.some(label=>label.name==='clpl-approved'));
+    const fragment=document.createDocumentFragment();
+    for(const item of approved){
+     const article=document.createElement('article');article.style.cssText='border:1px solid var(--line,#ddd);border-radius:14px;padding:20px;margin:18px 0;background:var(--card,#fff)';
+     const title=document.createElement('h3');title.textContent='Discussion '+item.number+' · '+item.title;
+     const date=document.createElement('p');date.className='small';const parsed=new Date(item.created_at);date.textContent='Published '+(Number.isNaN(parsed.getTime())?'':parsed.toLocaleDateString('en-GB'));
+     const body=document.createElement('p');body.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';body.textContent=item.body||'';
+     const reply=document.createElement('a');reply.href=formUrl;reply.target='_blank';reply.rel='noopener noreferrer';reply.className='button';reply.textContent='Respond to discussion '+item.number;
+     article.append(title,date,body,reply);fragment.append(article);
+    }
+    container.replaceChildren(fragment);status.textContent=approved.length?approved.length+' published contribution'+(approved.length===1?'':'s')+'. Responses are reviewed before publication.':'No contributions have been published yet. Automatic publication is still being connected; pending and rejected submissions are not displayed.';
+   }catch(error){status.textContent='The discussion board could not be refreshed. Please try again later. You can still submit a contribution using the form above.';}
+   finally{refresh.disabled=false;}
+  }
+  refresh.addEventListener('click',loadDiscussions);loadDiscussions();
  }
 })();
