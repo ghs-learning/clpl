@@ -42,17 +42,8 @@
   feed.innerHTML='<span class="eyebrow">Read · Reflect · Respond</span><h2>Staff discussion board</h2><p>Approved contributions will appear here for everyone to read. To respond, submit a contribution using the form above and mention the discussion number.</p><button type="button" class="button" id="refresh-discussions">Refresh discussions</button><p id="discussion-feed-status" role="status" aria-live="polite">Loading published contributions…</p><div id="discussion-feed"></div>';
   box.after(feed);
   const container=feed.querySelector('#discussion-feed');const status=feed.querySelector('#discussion-feed-status');const refresh=feed.querySelector('#refresh-discussions');
-  async function loadDiscussions(){
-   refresh.disabled=true;status.textContent='Loading published contributions…';
-   try{
-    const all=[];let next='https://api.github.com/repos/ghs-learning/clpl/issues?labels=clpl-approved&state=open&per_page=100&sort=created&direction=desc';
-    for(let i=0;next&&i<10;i++){
-     const response=await fetch(next,{headers:{Accept:'application/vnd.github+json'},cache:'no-store',credentials:'omit'});
-     if(!response.ok)throw Error('Feed unavailable');
-     const data=await response.json();if(!Array.isArray(data))throw Error('Invalid feed');all.push(...data);
-     const link=response.headers.get('Link')||'';const match=link.match(/<([^>]+)>; rel="next"/);next=match&&match[1].startsWith('https://api.github.com/repos/ghs-learning/clpl/issues?')?match[1]:null;
-    }
-    const approved=all.filter(item=>!item.pull_request&&item.user?.login==='michaelmcc19671888-dev'&&item.labels?.some(label=>label.name==='clpl-approved'));
+  const publishedSnapshot=[{"number": 2, "title": "Other topic or question", "created_at": "2026-11-25T12:00:00Z", "body": "Public display name: Staff contributor\n\nWhat are the ethical implications from using AI in teaching? (environmental impact, sensitive information, misinformation etc.)"}, {"number": 1, "title": "Pace and challenge", "created_at": "2026-11-24T21:15:00Z", "body": "Public display name: Staff contributor\n\nWhat do you think is the best top tip for teachers to ensure an appropriate pace is established early on in a lesson?"}];
+  function renderDiscussions(approved){
     const fragment=document.createDocumentFragment();
     for(const item of approved){
      const article=document.createElement('article');article.style.cssText='border:1px solid var(--line,#ddd);border-radius:14px;padding:20px;margin:18px 0;background:var(--card,#fff)';
@@ -63,7 +54,21 @@
      article.append(title,date,body,reply);fragment.append(article);
     }
     container.replaceChildren(fragment);status.textContent=approved.length?approved.length+' published contribution'+(approved.length===1?'':'s')+'. Responses are reviewed before publication.':'No contributions have been published yet. Approved contributions are added during a separate website update. Pending and rejected submissions are not displayed.';
-   }catch(error){status.textContent='The discussion board could not be refreshed. Please try again later. You can still submit a contribution using the form above.';}
+  }
+  renderDiscussions(publishedSnapshot);
+  async function loadDiscussions(){
+   refresh.disabled=true;status.textContent='Showing published contributions. Checking for updates…';
+   try{
+    const all=[];let next='https://api.github.com/repos/ghs-learning/clpl/issues?labels=clpl-approved&state=open&per_page=100&sort=created&direction=desc';
+    for(let i=0;next&&i<10;i++){
+     const response=await fetch(next,{headers:{Accept:'application/vnd.github+json'},cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(8000)});
+     if(!response.ok)throw Error('Feed unavailable');
+     const data=await response.json();if(!Array.isArray(data))throw Error('Invalid feed');all.push(...data);
+     const link=response.headers.get('Link')||'';const match=link.match(/<([^>]+)>; rel="next"/);next=match&&match[1].startsWith('https://api.github.com/repos/ghs-learning/clpl/issues?')?match[1]:null;
+    }
+    const approved=all.filter(item=>!item.pull_request&&item.user?.login==='michaelmcc19671888-dev'&&item.labels?.some(label=>label.name==='clpl-approved'));
+    renderDiscussions(approved);
+   }catch(error){status.textContent='Showing the '+container.querySelectorAll('article').length+' saved published contributions. Live updates are unavailable; you can still read and respond below.';}
    finally{refresh.disabled=false;}
   }
   refresh.addEventListener('click',loadDiscussions);loadDiscussions();
