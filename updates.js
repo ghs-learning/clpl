@@ -158,7 +158,7 @@ const children=[...page.children];let target=children.find(el=>/Term 1\s*(?:arch
 if(!target&&page.dataset.page==='journey')target=page.querySelector('.term1-divider');
 if(!target)return;
 target.id=target.id||'term1-'+page.dataset.page;target.setAttribute('tabindex','-1');
-const navLink=document.querySelector('a[href="#'+page.dataset.page+'"]');const label=navLink?.textContent.trim()||page.querySelector('h2')?.textContent.trim()||page.dataset.page;
+const chapterNames={headteacher:'Headteacher Insight',digital:'Digital Pedagogy',nibbles:'Knowledgeable Nibbles',teacher:'Teacher’s Corner',inclusive:'Inclusive Practice',journey:'Our Learning Journey',wellbeing:'Staff Wellbeing',lgbt:'LGBT+ Inclusion',reading:'Professional Reading'};const label=chapterNames[page.dataset.page]||page.querySelector('h2')?.textContent.trim()||page.dataset.page;
 chapters.push({page:page.dataset.page,target:target.id,label});
 });
 const existingNotice=[...archive.querySelectorAll('.notice')].find(el=>el.textContent.includes('Archive model:'));if(existingNotice)existingNotice.remove();
