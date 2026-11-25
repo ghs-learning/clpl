@@ -177,3 +177,11 @@ document.addEventListener('click',event=>{const link=event.target.closest('a[dat
  bulletins.classList.remove('panel');bulletins.style.marginTop='18px';
  const label=bulletins.querySelector('.eyebrow');if(label)label.textContent='Earlier sessions';
 })();
+
+(()=>{
+ const picture=document.querySelector('img[alt="Staff Conversations about Learning graphic"]');
+ if(!picture)return;
+ const svg=atob(picture.src.split(',')[1]).replace('<text x="100" y="390" font-size="66" font-weight="800">Staff Conversations about Learning</text>','<text x="100" y="370" font-size="62" font-weight="800">Staff Conversations</text><text x="100" y="442" font-size="62" font-weight="800">about Learning</text>').replace('y="455" font-size="31"','y="505" font-size="31"').replace('y="510" width="250"','y="560" width="250"');
+ picture.src='data:image/svg+xml;base64,'+btoa(svg);
+ picture.style.cssText='display:block;width:100%;height:auto;max-height:none;object-fit:contain;border-radius:16px';
+})();
