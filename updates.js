@@ -168,3 +168,12 @@ const firstGrid=archive.querySelector('.grid');if(firstGrid)firstGrid.before(rec
 function scrollToTarget(id){requestAnimationFrame(()=>requestAnimationFrame(()=>{const el=document.getElementById(id);if(el){if(el.tagName==='DETAILS')el.open=true;el.scrollIntoView({block:'start'});el.focus({preventScroll:true})}}))}
 document.addEventListener('click',event=>{const link=event.target.closest('a[data-session-term],a[data-archive-target]');if(!link)return;if(link.dataset.sessionTerm){const detail=document.getElementById('archive-'+session.id+'-term-'+link.dataset.sessionTerm);if(detail){detail.open=true;detail.tabIndex=-1;scrollToTarget(detail.id)}}else scrollToTarget(link.dataset.archiveTarget)});
 })();
+
+(()=>{
+ const bulletins=document.getElementById('previous-bulletins');if(!bulletins)return;
+ const dropdown=document.createElement('details');dropdown.className='panel pre-session-archive';dropdown.id='pre-session-2026-27';
+ const heading=document.createElement('summary');heading.textContent='Pre Session 2026-27';heading.style.cssText='cursor:pointer;font-size:24px;font-weight:800;padding:6px 0';
+ bulletins.before(dropdown);dropdown.append(heading,bulletins);
+ bulletins.classList.remove('panel');bulletins.style.marginTop='18px';
+ const label=bulletins.querySelector('.eyebrow');if(label)label.textContent='Earlier sessions';
+})();
