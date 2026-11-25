@@ -208,3 +208,63 @@ document.addEventListener('click',event=>{const link=event.target.closest('a[dat
  ].map(([t,a,b])=>'<article class="q-card"><h4>'+t+'</h4><p>“'+a+'”</p><p>“'+b+'”</p></article>').join('')+'</div><details><summary>See it in different subjects</summary><ul><li><strong>Maths:</strong> “Two methods give the same answer. Why do both work, and when would one be more useful?”</li><li><strong>English:</strong> “Which word most shapes your impression of the character? What supports a different interpretation?”</li><li><strong>Science:</strong> “What pattern do these results suggest? Which further result would make you question that explanation?”</li><li><strong>Social subjects:</strong> “What evidence supports this view? Whose perspective is missing?”</li><li><strong>Expressive arts and practical subjects:</strong> “Which choice had the greatest effect on the outcome? What would you change, and why?”</li></ul></details><details><summary>Try one small change tomorrow</summary><ol><li><strong>Before:</strong> plan one question, a likely misconception and a useful follow-up prompt.</li><li><strong>During:</strong> give everyone thinking time. Listen for the reasoning, then invite a pupil to build on another answer.</li><li><strong>Check more widely:</strong> use mini-whiteboards, a quick written answer or another accessible whole-class response. One confident answer does not show what everyone understands.</li><li><strong>Respond:</strong> clarify or model again if needed; offer a scaffold or move to a more demanding question when ready.</li><li><strong>Reflect:</strong> whose thinking did I hear? What did the answers reveal? What will I adjust next lesson?</li></ol><p class="note"><strong>Make participation accessible.</strong> Offer visual prompts, vocabulary, sentence stems, additional processing time or an alternative way to respond. “No opt out” should mean support to take part, never public pressure or embarrassment.</p></details><details><summary>View the original shared visual</summary><p>The original image is included as a reference. Its key ideas have been recreated above as readable text and illustrations.</p><a href="https://ghs-learning.github.io/clpl/questioning-reference.jpeg" target="_blank" rel="noopener noreferrer"><img src="https://ghs-learning.github.io/clpl/questioning-reference.jpeg" alt="Shared reference visual: higher-order question stems, planned questions, wait time, no hands up, no opt out and Pose, Pause, Pounce, Bounce." loading="lazy" style="width:100%;height:auto;border-radius:12px"></a></details>';
  const lead=page.querySelector('.teacher-current-lead');if(lead)lead.before(panel);else page.append(panel);
 })();
+
+
+/* Term availability, chapter illustrations and moderated positive recommendations. */
+(()=>{
+'use strict';
+const css=document.createElement('style');css.textContent=`
+.ghs-term-unavailable{display:inline-flex;align-items:center;gap:8px;border:1px solid #b8c1c7;border-radius:8px;padding:11px 15px;background:#edf0f2;color:#56636c;font:inherit;font-weight:700;cursor:not-allowed;margin-top:auto;width:fit-content}.ghs-term-unavailable:disabled{opacity:1}.section-card.ghs-icon-card{position:relative;padding-right:86px;border-top:4px solid var(--chapter-colour,#177f83)}.ghs-chapter-icon{position:absolute;right:16px;top:17px;width:54px;height:54px;display:grid;place-items:center;border-radius:15px;background:var(--chapter-tint,#e8f3f2);color:var(--chapter-colour,#177f83);pointer-events:none}.ghs-chapter-icon svg{width:35px;height:35px}.term2-tile{position:relative}.term2-tile .term2-tile-body,.term2-tile .body{position:relative;padding-top:22px}.term2-tile .ghs-chapter-icon{position:static;float:right;margin:0 0 12px 12px;width:46px;height:46px}.ghs-heart-area{border-top:1px solid #d9dfe2;padding-top:14px;margin-top:18px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}.ghs-heart-link{display:inline-flex;gap:8px;align-items:center;padding:10px 13px;border:1px solid #bf3f59;border-radius:30px;background:#fff3f5;color:#92253f!important;text-decoration:none;font-weight:750;min-height:44px}.ghs-heart-link:hover{background:#ffe2e9}.ghs-heart-link:focus-visible{outline:3px solid #162d49;outline-offset:3px}.ghs-heart-total{font-size:13px;color:var(--muted,#52616c)}.ghs-heart-intro{border-left:4px solid #bf3f59;padding:18px 20px;background:#fff3f5;border-radius:10px;margin:20px 0}.ghs-heart-intro h3{margin-top:0}.ghs-heart-link svg{width:22px;height:22px;flex-shrink:0}@media(max-width:420px){.section-card.ghs-icon-card{padding-right:76px}.ghs-chapter-icon{right:12px;width:45px;height:45px}}`;
+document.head.append(css);
+// Replace links entirely: no retained href or click handler can route to Term 2.
+for(const a of document.querySelectorAll('a[data-session-term="3"],a[data-session-term="4"]')){
+ const n=a.dataset.sessionTerm;const b=document.createElement('button');b.type='button';b.disabled=true;b.className='ghs-term-unavailable';b.textContent='Term '+n+' · Coming soon';b.setAttribute('aria-label','Term '+n+' is not available yet');a.replaceWith(b);
+}
+// Planned editions remain visible in the archive, with no expandable content.
+for(const d of document.querySelectorAll('.edition-archive details[data-edition-status="planned"]')){
+ const n=d.id.match(/term-(\d)$/)?.[1];if(!n)continue;const item=document.createElement('div');item.className='q-planned-edition';item.style.cssText='border:1px solid #c8cfd0;border-radius:10px;margin:14px 0;padding:18px';const h=document.createElement('h3');h.textContent='Term '+n+' · Coming soon';const p=document.createElement('p');p.textContent='This edition is not active yet. It will be opened when its content is ready.';item.append(h,p);d.replaceWith(item);
+}
+const paths={
+headteacher:'<path d="M12 26h40v27H12zM22 53v6m20-6v6M22 36h20m-20 8h13"/><path d="M26 19l6-10 6 10"/>',
+professional:'<rect x="10" y="22" width="44" height="32" rx="5"/><path d="M23 22v-8h18v8M10 35h44M28 35v8h8v-8"/>',
+digital:'<rect x="17" y="8" width="30" height="48" rx="5"/><path d="M26 16h12M29 49h6M25 27l-4 5 4 5m14-10 4 5-4 5"/>',
+nibbles:'<path d="M12 25h32v15a16 16 0 01-32 0zM44 27h5a8 8 0 010 16h-6M11 58h37M21 17v-7m14 7v-7"/>',
+teacher:'<path d="M9 12h46v32H31L20 54V44H9zM24 24c0-9 16-9 16 0 0 5-8 5-8 11m0 4v1"/>',
+literacy:'<path d="M32 18C22 11 11 12 7 16v36c9-5 16-4 25 2 9-6 16-7 25-2V16c-4-4-15-5-25 2zM32 18v36M14 25h10m-10 9h10m16-9h10m-10 9h10"/>',
+inclusive:'<circle cx="32" cy="12" r="6"/><path d="M10 26h44M32 21v19m0 0L17 57m15-17 15 17M20 26l4 14m20-14-4 14"/>',
+journey:'<path d="M15 54c35 2-7-19 22-22 28-3 4-16 15-20M46 10h9v10"/><circle cx="13" cy="53" r="5"/><circle cx="37" cy="32" r="4"/>',
+wellbeing:'<path d="M32 54S7 38 7 23c0-16 20-18 25-4 5-14 25-12 25 4 0 15-25 31-25 31zM15 32h10l5-9 6 18 5-9h8"/>',
+lgbt:'<path d="M8 50V32a24 24 0 0148 0v18M16 50V32a16 16 0 0132 0v18M24 50V32a8 8 0 0116 0v18"/>',
+reading:'<path d="M10 11h32a8 8 0 018 8v36H18a8 8 0 01-8-8V11zM18 43h32M20 23h19m-19 9h15M10 47a7 7 0 017-4"/>',
+feedback:'<path d="M8 12h48v33H30L16 57V45H8zM20 24h24m-24 10h16"/>',
+conversations:'<path d="M7 10h35v25H25L14 45V35H7zM29 43h12l10 10V43h6V24H49"/>',
+sqa:'<path d="M32 7l23 10v16c0 13-23 25-23 25S9 46 9 33V17zM20 31l8 8 17-18"/>',
+cic:'<path d="M14 22a22 22 0 0139 1m0-13v13H40M50 43a22 22 0 01-39-1m0 13V42h13"/><path d="M25 31l5 5 10-10"/>'};
+const colours={headteacher:['#162d49','#edf1f7'],professional:['#217957','#e9f5ed'],digital:['#286da3','#e9f3fb'],nibbles:['#95591e','#fbefdd'],teacher:['#923d60','#f9edf3'],literacy:['#7752a0','#f3edfa'],inclusive:['#167b7e','#e7f5f3'],journey:['#297849','#eaf4ec'],wellbeing:['#b44259','#fff0f3'],lgbt:['#8456a7','#f6edfa'],reading:['#a46627','#faf0e3'],feedback:['#3c6f8b','#eaf2f7'],conversations:['#277b7e','#eaf5f5'],sqa:['#276b98','#edf4fb'],cic:['#177b72','#eaf5ee']};
+function decorate(card,key){
+ if(!paths[key]||card.querySelector('.ghs-chapter-icon'))return;
+ const icon=document.createElement('span');icon.className='ghs-chapter-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'+paths[key]+'</svg>';
+ const [colour,tint]=colours[key];card.style.setProperty('--chapter-colour',colour);card.style.setProperty('--chapter-tint',tint);card.classList.add('ghs-icon-card');card.prepend(icon);
+}
+for(const card of document.querySelectorAll('[data-page="current"] .section-card'))decorate(card,card.getAttribute('href')?.slice(1));
+for(const tile of document.querySelectorAll('.term2-tile')){
+ const body=tile.querySelector('.term2-tile-body,.body');const key=tile.querySelector('a[href^="#"]')?.getAttribute('href').slice(1)||'headteacher';if(body)decorate(body,key);
+}
+const page=document.querySelector('[data-page="professional"]');if(!page)return;
+const courses=[...page.querySelectorAll('.course')];if(!courses.length)return;
+const intro=document.createElement('section');intro.className='ghs-heart-intro';intro.innerHTML='<h3>A useful course? Pass it on.</h3><p>If you have attended an event and would recommend it to colleagues, select its heart and add your name. Mr McCarron reviews every recommendation before it can be included.</p><p class="small">Hearts are positive recommendations only — no scores, negative ratings or public names. Totals show approved recommendations published to the Hub. Approval and publication are currently separate steps, so totals do not update immediately. Please recommend each event only once.</p>';
+const gallery=courses[0].parentElement;gallery.before(intro);
+const publicCounts=Object.create(null); // No recommendations have been approved and published yet.
+const form='https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=oyzTzM4Wj0KVQTctawUZKVLnjtvOIV5FoiT5ZNCp0HNUNE1GSEo0OVlUQzRFWjFCVldDUE9TVjVHMy4u';
+const totalEls=new Map();
+for(const card of courses){
+ const title=card.querySelector('h3')?.textContent.trim();const number=card.querySelector('.tag')?.textContent.match(/course (\d+) of/i)?.[1];if(!title||!number)continue;
+ const id='CPD-'+number.padStart(2,'0');card.dataset.recommendationId=id;
+ const area=document.createElement('div');area.className='ghs-heart-area';
+ const a=document.createElement('a');a.className='ghs-heart-link';a.href=form+'&r1fdd9ef7421d44a99083fcd818d67284='+encodeURIComponent(id+' | '+title)+'&r75ef5ad488b54baeb98e441de95e0873='+encodeURIComponent('I have attended this event and recommend it to colleagues.');a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label','Recommend '+title+' — name and approval required');a.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21S2 14.5 2 8.5C2 2 10 1 12 6c2-5 10-4 10 2.5C22 14.5 12 21 12 21z"/></svg><span>Recommend</span>';
+ const total=document.createElement('span');total.className='ghs-heart-total';total.setAttribute('aria-live','polite');total.textContent='0 approved recommendations';totalEls.set(id,total);area.append(a,total);card.append(area);
+}
+function showTotals(counts){for(const [id,el] of totalEls){const n=counts[id];if(Number.isSafeInteger(n)&&n>=0)el.textContent=n+' approved recommendation'+(n===1?'':'s');}}
+showTotals(publicCounts);
+fetch('https://ghs-learning.github.io/clpl/recommendation-totals.json',{cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(8000)}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(data=>{if(data.session==='2026-27'&&data.counts&&typeof data.counts==='object')showTotals(data.counts)}).catch(()=>{});
+})();
